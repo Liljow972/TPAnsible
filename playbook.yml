@@ -1,0 +1,69 @@
+---
+
+- name: automated vertification
+  hosts: host
+  tasks:
+     - name: RUN'Install'
+       apt: 
+         name: nginx
+         state: latest
+
+     - name: RUN'Start nginx'
+       shell: service nginx start
+
+     - name: RUN'Install curl'
+       apt: 
+         name: curl
+         state: latest
+
+     - name: RUN'curl Depot'
+       shell: curl -sL https://deb.nodesource.com/setup_6.x -o nodesource_setup.sh
+
+     - name: RUN'Run le script'  
+       shell: bash nodesource_setup.sh
+
+
+     - name: RUN'Nodejs'  
+       apt: 
+         name: nodejs
+
+
+     - name: RUN'Install git'
+       apt:
+         name: git
+         state: latest
+
+
+     - name: RUN'clonage git'
+       git: >
+         repo=https://git.mrzee.fr/student/my-node-project.git
+         dest=/var/www/my-node-project
+
+
+     - name: RUN'Install pm2'
+       npm:
+         name: pm2
+         global: yes
+         state: latest
+
+     - name: RUN'npm install for myapp'
+       command: npm install 
+       args:
+         chdir: /var/www/my-node-project/myapp
+
+
+     - name: RUN'start pm'
+       command: pm2 start ./bin/www
+       args:
+         chdir: /var/www/my-node-project/myapp
+
+     - name: RUN'copie des dossiers'
+       copy:
+         src: /var/www/my-node-project/vhost
+         dest: /etc/nginx/sites-enabled/default
+         remote_src: yes
+
+     - name: RUN'Restart nginx'
+       shell: service nginx restart
+
+...
